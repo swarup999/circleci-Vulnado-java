@@ -16,7 +16,6 @@
 *.iml
 *.ipr
 *.txt
-test.txt
 
 ### NetBeans ###
 /nbproject/private/
