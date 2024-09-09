@@ -1,0 +1,26 @@
+version: '3'
+services:
+  jenkins:
+    build: .  # This will build the Docker image from the Dockerfile in the same directory
+    container_name: jenkins-blueocean
+    restart: on-failure
+    networks:
+      - jenkins
+    environment:
+      - DOCKER_HOST=tcp://docker:2376  # Docker host for communication
+      - DOCKER_CERT_PATH=/certs/client  # Path to Docker certificates
+      - DOCKER_TLS_VERIFY=1  # Enable TLS verification
+    volumes:
+      - jenkins-data:/var/jenkins_home  # Persistent Jenkins data
+      - jenkins-docker-certs:/certs/client:ro  # Mount Docker client certs for TLS connection (read-only)
+    ports:
+      - "8080:8080"  # Jenkins web UI
+      - "50000:50000"  # Jenkins agent connections
+
+networks:
+  jenkins:
+    driver: bridge  # Creates a custom bridge network called 'jenkins'
+
+volumes:
+  jenkins-data:  # Persistent volume for Jenkins home directory
+  jenkins-docker-certs:  # Volume for Docker TLS client certificates
