@@ -7,8 +7,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                env.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                script {
+                    env.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()     
+                }
                 git env.REPO_URL
+                
             }
         }
         stage('TruffleHog Secret Scan') {
