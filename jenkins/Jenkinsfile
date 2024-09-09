@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                echo "Building"
+            }
+        }
+        stage("Test") {
+            steps {
+                echo "Testing"
+            }
+        }
+        stage("Deliver") {
+            steps {
+                echo "Deliver"
+            }
+        }
+    }
+}
