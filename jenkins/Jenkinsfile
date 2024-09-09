@@ -7,6 +7,25 @@ pipeline {
                 git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
             }
         }
+        stage('TruffleHog Secret Scan') {
+            steps {
+                script {
+                    echo "Running TruffleHog Scan"
+                    // Get the current repository URL
+                    def repoUrl = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    echo "Repository URL: ${repoUrl}"
+
+                    // This command runs TruffleHog in a Docker container, scanning the GitHub organization
+                    // sh '''
+                    // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo https://github.com/trufflesecurity/test_keys --fail
+                    // '''
+
+                    sh '''
+                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo ${repoUrl} --fail
+                    '''
+                }
+            }
+        }
         stage('Build') {
             steps {
                 echo "Building"
