@@ -3,17 +3,22 @@ pipeline {
     environment {
         REPO_URL = ''
         CURR_BRANCH = ''
+        workspace = ''
     }
 
-    def workspace="";
-    
     stages {
         stage ('Checkout SCM') 
         {
-            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    checkout scm
-                    workspace = pwd ()
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        checkout scm
+                        workspace = pwd ()
+                    }
+                    
             }
+            }
+            
         }
         stage('TruffleHog Secret Scan') {
             steps {
