@@ -23,4 +23,17 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            echo 'Cleaning up...'
+            // Perform cleanup or archive reports
+        }
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
+    }
 }
