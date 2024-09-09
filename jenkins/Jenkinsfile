@@ -24,7 +24,7 @@ pipeline {
                     // '''
 
                     sh '''
-                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo $REPO_URL --fail
+                    docker run --rm -it -v "$PWD" trufflesecurity/trufflehog:latest filesystem $PWD --fail
                     '''
                      
                 }
