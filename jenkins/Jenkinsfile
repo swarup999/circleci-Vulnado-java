@@ -1,10 +1,14 @@
 pipeline {
     agent any
-
+    environment {
+        REPO_URL = ''
+        CURR_BRANCH = ''
+    }
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
+                env.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                git env.REPO_URL
             }
         }
         stage('TruffleHog Secret Scan') {
@@ -13,9 +17,10 @@ pipeline {
                     echo "Running TruffleHog Scan"
                     // Get the current repository URL
                     def repoUrl = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
                     echo "Repository URL: ${repoUrl}"
                     echo "Branch Name: ${branchName}"
+                    echo "Branch Name from env: ${env.BRANCH_NAME}"
 
                     // This command runs TruffleHog in a Docker container, scanning the GitHub organization
                     // sh '''
@@ -23,7 +28,7 @@ pipeline {
                     // '''
 
                     sh '''
-                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo ${repoUrl} --fail
+                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo ${env.REPO_URL} --fail
                     '''
                      
                 }
