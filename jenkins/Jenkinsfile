@@ -7,14 +7,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-                    CURR_BRANCH = sh(script: 'git branch --show-current', returnStdout: true).trim()
-                    echo "REPO_URL : $REPO_URL"
-                }
-                git branch: "$CURR_BRANCH", url: "$REPO_URL"
-                
-                
+                echo "checkout"
             }
         }
         stage('TruffleHog Secret Scan') {
@@ -22,11 +15,8 @@ pipeline {
                 script {
                     echo "Running TruffleHog Scan"
                     // Get the current repository URL
-                    def repoUrl = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-                    def currentBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "Repository URL: ${repoUrl}"
-                    echo "Branch Name: ${branchName}"
-                    echo "Branch Name from env: ${env.BRANCH_NAME}"
+                    REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
                     // This command runs TruffleHog in a Docker container, scanning the GitHub organization
                     // sh '''
@@ -34,7 +24,7 @@ pipeline {
                     // '''
 
                     sh '''
-                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo ${env.REPO_URL} --fail
+                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo $REPO_URL --fail
                     '''
                      
                 }
