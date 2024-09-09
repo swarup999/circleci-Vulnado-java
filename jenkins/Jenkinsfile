@@ -8,7 +8,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    env.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    def REPO_URL = sh(script: 'git branch --show-current', returnStdout: true).trim()
+                    echo "Branch Name from env: ${env.BRANCH_NAME}"
                     echo "${env.REPO_URL}"
                     git env.REPO_URL     
                 }
