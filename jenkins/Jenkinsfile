@@ -10,7 +10,7 @@ pipeline {
                 script {
                     REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
                     CURR_BRANCH = sh(script: 'git branch --show-current', returnStdout: true).trim()
-                    echo "REPO_URL : ${params.REPO_URL}"
+                    echo "REPO_URL : $REPO_URL"
                 }
                 git branch: "$CURR_BRANCH", url: "$REPO_URL"
                 
