@@ -4,10 +4,15 @@ pipeline {
         REPO_URL = ''
         CURR_BRANCH = ''
     }
+
+    def workspace="";
+    
     stages {
-        stage('Checkout') {
-            steps {
-                echo "checkout"
+        stage ('Checkout SCM') 
+        {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    checkout scm
+                    workspace = pwd ()
             }
         }
         stage('TruffleHog Secret Scan') {
