@@ -13,7 +13,9 @@ pipeline {
                     echo "Running TruffleHog Scan"
                     // Get the current repository URL
                     def repoUrl = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
                     echo "Repository URL: ${repoUrl}"
+                    echo "Branch Name: ${branchName}"
 
                     // This command runs TruffleHog in a Docker container, scanning the GitHub organization
                     // sh '''
