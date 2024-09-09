@@ -8,10 +8,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    env.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()     
+                    env.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    echo "${env.REPO_URL}"
+                    git env.REPO_URL     
                 }
-                echo "${env.REPO_URL}"
-                git env.REPO_URL
+                
                 
             }
         }
