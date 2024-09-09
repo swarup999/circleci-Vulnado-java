@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    environment {
+    parameters {
         REPO_URL = ''
         CURR_BRANCH = ''
     }
@@ -8,11 +8,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    def REPO_URL = sh(script: 'git branch --show-current', returnStdout: true).trim()
-                    echo "Branch Name from env: ${env.BRANCH_NAME}"
-                    echo "${env.REPO_URL}"
-                    git env.REPO_URL     
+                    params.REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    params.CURR_BRANCH = sh(script: 'git branch --show-current', returnStdout: true).trim()
+                    echo "REPO_URL : ${params.REPO_URL}"
                 }
+                git branch: "${params.CURR_BRANCH}", url: "${params.REPO_URL}"
                 
                 
             }
