@@ -33,8 +33,12 @@ pipeline {
                     // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo https://github.com/trufflesecurity/test_keys --fail
                     // '''
 
+                    // sh '''
+                    // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git $PWD --fail
+                    // '''
+
                     sh '''
-                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git $PWD --fail
+                    docker ps
                     '''
                      
                 }
