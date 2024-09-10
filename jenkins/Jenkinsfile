@@ -1,8 +1,7 @@
 pipeline {
     agent {
-        docker {
-            image 'alpine:latest'  // Use Alpine as the base container for the entire pipeline
-            // args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for sibling containers
+        node {
+            label 'docker-agent-alpine'
         }
     }
     environment {
@@ -11,13 +10,13 @@ pipeline {
         workspace = ''
     }
     stages {
-        stage('Install Docker Client') {
-            steps {
-                sh '''
-                apk add --no-cache docker-cli  # Install Docker client in the Alpine container
-                '''
-            }
-        }
+        // stage('Install Docker Client') {
+        //     steps {
+        //         sh '''
+        //         apk add --no-cache docker-cli  # Install Docker client in the Alpine container
+        //         '''
+        //     }
+        // }
         stage ('Checkout SCM') 
         {
             steps {
