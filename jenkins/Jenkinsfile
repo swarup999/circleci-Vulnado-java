@@ -1,6 +1,10 @@
 pipeline {
     agent {
-        label 'docker-agent-alpine'  
+        // label 'docker-agent-alpine'  
+        docker {
+            image 'alpine:latest'  // Use the official Alpine image
+            args '-v /var/run/docker.sock:/var/run/docker.sock'  // Mount Docker socket for sibling containers
+        }
     }
     environment {
         REPO_URL = ''
@@ -8,13 +12,16 @@ pipeline {
         workspace = ''
     }
     stages {
-        // stage('Install Docker Client') {
-        //     steps {
-        //         sh '''
-        //         apk add --no-cache docker-cli  # Install Docker client in the Alpine container
-        //         '''
-        //     }
-        // }
+        stage('Install Docker Client') {
+            steps {
+                sh 'docker ps'
+                sh '''
+                apk add --no-cache docker-cli  # Install Docker client in the Alpine container
+                '''
+
+                sh 'docker ps'
+            }
+        }
         stage ('Checkout SCM') 
         {
             steps {
