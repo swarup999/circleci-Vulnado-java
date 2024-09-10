@@ -1,4 +1,3 @@
-version: '3'
 services:
   jenkins:
     build: .  # This will build the Docker image from the Dockerfile in the same directory
@@ -6,10 +5,10 @@ services:
     restart: on-failure
     networks:
       - jenkins
-    environment:
-      - DOCKER_HOST=tcp://docker:2376  # Docker host for communication
-      - DOCKER_CERT_PATH=/certs/client  # Path to Docker certificates
-      - DOCKER_TLS_VERIFY=1  # Enable TLS verification
+    # environment:
+    #   # - DOCKER_HOST=tcp://docker:2376  # Docker host for communication
+    #   # - DOCKER_CERT_PATH=/certs/client  # Path to Docker certificates
+    #   # - DOCKER_TLS_VERIFY=1  # Enable TLS verification
     volumes:
       - jenkins-data:/var/jenkins_home  # Persistent Jenkins data
       - jenkins-docker-certs:/certs/client:ro  # Mount Docker client certs for TLS connection (read-only)
