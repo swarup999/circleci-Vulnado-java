@@ -20,7 +20,7 @@ pipeline {
         stage('TruffleHog Secret Scan') {
             steps {
                 script {
-                    echo "Running TruffleHog Scan"
+                    echo "Getting git repo info"
                     // Get the current repository URL
                     REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
                     CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
@@ -33,15 +33,18 @@ pipeline {
                     // sh '''
                     // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git $PWD --fail
                     // '''
-                    rm trufflehog || true
+                    
+                }
+                script {
+                    echo "Running Trufflehog Scan"
+                    sh 'rm -f trufflehog'
                     sh '''
-                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file://. --fail > trufflehog
+                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd --fail > trufflehog
                     '''
-                    cat trufflehog
                     def truffle = readFile "trufflehog"
                      
                     if (truffle.length() == 0) {
-                        echo "Good to go" 
+                        echo "Good to go. No secrets found" 
                     }
                     else {
                         echo "Warning! Secrets are committed into your git repository."
