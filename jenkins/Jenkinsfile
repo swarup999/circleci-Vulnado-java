@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
-                echo "Repository checked out successfully"
+                echo "Repository checked out successfully3"
 
             }
         }
