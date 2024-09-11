@@ -17,6 +17,20 @@ pipeline {
                 }
             }
         }
+        stage('Check Git Status') {
+            steps {
+                script {
+                    // Ensure we are in a Git repository
+                    sh 'git status'
+                    
+                    // List files staged for commit
+                    sh 'git diff --name-only --cached'
+
+                    // List all files changed since the last commit
+                    sh 'git diff HEAD --name-only'
+                }
+            }
+        }
         stage('TruffleHog Secret Scan') {
             steps {
                 script {
