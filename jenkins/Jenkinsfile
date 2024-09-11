@@ -12,12 +12,27 @@ pipeline {
                         sh 'docker pull returntocorp/semgrep'
                     }
                 }
-                stage('Run Semgrep') {
-                    steps {
-                        echo "Running Semgrep Static Analysis"
-                        sh 'docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep semgrep --config p/ci --error'
-                    }
-                }
+                stage('Run Semgrep on changed files') {
+                            steps {
+                                echo "Running Semgrep Static Analysis on changed files"
+
+                                script {
+                                    // Λαμβάνουμε τα τροποποιημένα αρχεία από το τελευταίο commit
+                                    def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim()
+
+                                    if (changedFiles) {
+                                        echo "Files changed in the last commit: ${changedFiles}"
+
+                                        // Εκτέλεση Semgrep μόνο στα αλλαγμένα αρχεία
+                                        sh """
+                                            docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep semgrep --config p/ci --error ${changedFiles}
+                                        """
+                                    } else {
+                                        echo "No files changed in the last commit."
+                                    }
+                                }
+                            }
+                        }
         stage('Build') {
             steps {
                 echo "Building"
