@@ -35,42 +35,33 @@ pipeline {
         }
         stage('TruffleHog Secret Scan') {
             steps {
-                script {
-                    echo "Getting git repo info"
-                    // Get the current repository URL
-                    REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-                    CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        echo "Getting git repo info"
+                        // Get the current repository URL
+                        REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                        CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
-                    sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()
-
-                    // This command runs TruffleHog in a Docker container, scanning the GitHub organization
-                    // sh '''
-                    // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo https://github.com/trufflesecurity/test_keys --fail
-                    // '''
-
-                    // sh '''
-                    // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git $PWD --fail
-                    // '''
-                     
-                }
-                script {
-                    echo "Running Trufflehog Scan"
-                    sh 'rm -f trufflehog'
-
-                    sh 'git status'
-
-                    sh """ 
-                    docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
-                    git file:///workspace --since-commit HEAD --branch ${CURR_BRANCH} --no-verification --fail > trufflehog
-                    """
-                    def truffle = readFile "trufflehog" 
-                      
-                    if (truffle.length() == 0) {
-                        echo "Good to go. No secrets found" 
+                        sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()
+                        
                     }
-                    else {
-                        echo "Warning! Secrets are committed into your git repository."
-                        throw new Exception("Secrets might be committed into your git repo")
+                    script {
+                        echo "Running Trufflehog Scan"
+                        sh 'rm -f trufflehog'
+
+                        sh """ 
+                        docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
+                        git file:///workspace --since-commit HEAD --branch ${CURR_BRANCH} --no-verification --fail > trufflehog
+                        """
+                        def truffle = readFile "trufflehog" 
+                        
+                        if (truffle.length() == 0) {
+                            echo "Good to go. No secrets found" 
+                        }
+                        else {
+                            echo "Warning! Secrets are committed into your git repository."
+                            throw new Exception("Secrets might be committed into your git repo")
+                        }
                     }
                 }
             }
