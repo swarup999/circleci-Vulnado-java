@@ -29,8 +29,8 @@ pipeline {
                     // List all files changed since the last commit
                     sh 'git diff HEAD --name-only'
                 }
-            }
-            echo workspace
+                echo workspace
+            }   
         }
         stage('TruffleHog Secret Scan') {
             steps {
