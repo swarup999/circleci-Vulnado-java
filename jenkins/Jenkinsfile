@@ -15,7 +15,7 @@ pipeline {
                 stage('Run Semgrep') {
                     steps {
                         echo "Running Semgrep Static Analysis"
-                        sh 'docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep --config p/ci --error'
+                        sh 'docker run --rm -v ${WORKSPACE}:/src returntocorp/semgrep semgrep --config p/ci --error'
                     }
                 }
         stage('Build') {
