@@ -60,7 +60,7 @@ pipeline {
                     sh 'git status'
 
                     sh '''
-                    docker run --rm -v "${env.WORKSPACE}:/workspace" trufflesecurity/trufflehog:latest \
+                    docker run --rm -v "$WORKSPACE:/workspace" trufflesecurity/trufflehog:latest \
                     git file:///workspace --since-commit HEAD --no-verification --fail > trufflehog
                     '''
                     def truffle = readFile "trufflehog" 
