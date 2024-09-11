@@ -29,7 +29,7 @@ pipeline {
                     // List all files changed since the last commit
                     sh 'git diff HEAD --name-only'
                 }
-                echo WORKSPACE
+                echo workspace
                 echo pwd
             }   
         }
