@@ -3,7 +3,7 @@ pipeline {
     environment {
         REPO_URL = ''
         CURR_BRANCH = ''
-        workspace = ''
+        WORKSPACE = ''
     }
     stages {
         stage ('Checkout SCM') 
@@ -12,7 +12,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         checkout scm
-                        workspace = pwd ()
+                        WORKSPACE = pwd ()
                     }
                 }
             }
@@ -29,7 +29,7 @@ pipeline {
                     // List all files changed since the last commit
                     sh 'git diff HEAD --name-only'
                 }
-                echo workspace
+                echo WORKSPACE
                 echo pwd
             }   
         }
@@ -60,7 +60,7 @@ pipeline {
                     sh 'git status'
 
                     sh '''
-                    docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
+                    docker run --rm -v "${env.WORKSPACE}:/workspace" trufflesecurity/trufflehog:latest \
                     git file:///workspace --since-commit HEAD --no-verification --fail > trufflehog
                     '''
                     def truffle = readFile "trufflehog" 
