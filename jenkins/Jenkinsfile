@@ -9,7 +9,7 @@ pipeline {
         }
         stage('Install Semgrep') {
                     steps {
-                        sh 'pip install semgrep'
+                        sh 'docker pull returntocorp/semgrep'
                     }
                 }
                 stage('Run Semgrep') {
