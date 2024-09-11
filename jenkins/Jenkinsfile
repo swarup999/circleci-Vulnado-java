@@ -5,10 +5,19 @@ pipeline {
         stage('Checkout') {
             steps {
                 git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
-                echo "Repository checked out successfully3"
-
             }
         }
+        stage('Install Semgrep') {
+                    steps {
+                        sh 'pip install semgrep'
+                    }
+                }
+                stage('Run Semgrep') {
+                    steps {
+                        echo "Running Semgrep Static Analysis"
+                        sh 'semgrep --config p/ci'
+                    }
+                }
         stage('Build') {
             steps {
                 echo "Building"
@@ -17,7 +26,6 @@ pipeline {
         stage("Test") {
             steps {
                 echo "Testing"
-                echo "Testing4"
             }
         }
         stage("Deliver") {
@@ -29,8 +37,7 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up...22'
-            echo 'Cleaning up Continue 2...'
+            echo 'Cleaning up...'
             // Perform cleanup or archive reports
         }
         success {
