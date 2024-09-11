@@ -39,6 +39,8 @@ pipeline {
                     REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
                     CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
+                    sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()
+
                     // This command runs TruffleHog in a Docker container, scanning the GitHub organization
                     // sh '''
                     // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest github --repo https://github.com/trufflesecurity/test_keys --fail
