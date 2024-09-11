@@ -52,6 +52,9 @@ pipeline {
                 script {
                     echo "Running Trufflehog Scan"
                     sh 'rm -f trufflehog'
+
+                    sh 'git status'
+
                     sh '''
                     docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest \
                     git file:///pwd --since-commit HEAD --no-verification --fail > trufflehog
