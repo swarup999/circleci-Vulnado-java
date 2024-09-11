@@ -17,34 +17,21 @@ pipeline {
                 }
             }
         }
-        stage('Check Git Status') {
+        stage('Setting Environment Variables') {
             steps {
                 script {
-                    // Ensure we are in a Git repository
-                    sh 'git status'
-                    
-                    // List files staged for commit
-                    sh 'git diff --name-only --cached'
-
-                    // List all files changed since the last commit
-                    sh 'git diff HEAD --name-only'
-                }
-                echo workspace
-                echo pwd
-            }   
-        }
-        stage('TruffleHog Secret Scan') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
                         echo "Getting git repo info"
                         // Get the current repository URL
                         REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
                         CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
-                        sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()
-                          
+                        sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()          
                     }
+            }   
+        }
+        stage('TruffleHog Secret Scan') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
                     script {
                         echo "Running Trufflehog Scan"
                         sh 'rm -f trufflehog'
