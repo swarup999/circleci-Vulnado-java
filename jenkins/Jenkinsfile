@@ -39,7 +39,8 @@ pipeline {
                     echo "Running Trufflehog Scan"
                     sh 'rm -f trufflehog'
                     sh '''
-                    docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file:///pwd > trufflehog
+                    docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest \
+                    git file:///pwd --since-commit HEAD --no-verification --fail > trufflehog
                     '''
                     def truffle = readFile "trufflehog" 
                      
