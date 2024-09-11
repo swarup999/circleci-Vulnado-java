@@ -30,6 +30,7 @@ pipeline {
                     sh 'git diff HEAD --name-only'
                 }
                 echo workspace
+                echo pwd
             }   
         }
         stage('TruffleHog Secret Scan') {
