@@ -47,7 +47,7 @@ pipeline {
                     // sh '''
                     // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git $PWD --fail
                     // '''
-                    
+                     
                 }
                 script {
                     echo "Running Trufflehog Scan"
