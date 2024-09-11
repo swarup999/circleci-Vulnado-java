@@ -26,7 +26,7 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up...'
+            echo 'Cleaning up...22'
             echo 'Cleaning up Continue 2...'
             // Perform cleanup or archive reports
         }
