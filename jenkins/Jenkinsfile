@@ -1,23 +1,11 @@
 pipeline {
-    agent {
-        label 'docker-agent-alpine'
-    }
+    agent any
     environment {
         REPO_URL = ''
         CURR_BRANCH = ''
         workspace = ''
     }
     stages {
-        stage('Install Docker Client') {
-            steps {
-                sh 'docker ps'
-                sh '''
-                apk add --no-cache docker-cli  # Install Docker client in the Alpine container
-                '''
-
-                sh 'docker ps'
-            }
-        }
         stage ('Checkout SCM') 
         {
             steps {
@@ -45,11 +33,20 @@ pipeline {
                     // sh '''
                     // docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git $PWD --fail
                     // '''
-
+                    rm trufflehog || true
                     sh '''
-                    docker ps
+                    docker run --rm -it -v "$PWD:/pwd" trufflesecurity/trufflehog:latest git file://. --fail > trufflehog
                     '''
-                     
+                    cat trufflehog
+                    def truffle = readFile "trufflehog"
+		   
+                    if (truffle.length() == 0) {
+                        echo "Good to go" 
+                    }
+                    else {
+                        echo "Warning! Secrets are committed into your git repository."
+                        throw new Exception("Secrets might be committed into your git repo")
+                    }
                 }
             }
         }

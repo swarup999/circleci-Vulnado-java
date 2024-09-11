@@ -16,7 +16,6 @@ services:
     ports:
       - "8080:8080"  # Jenkins web UI
       - "50000:50000"  # Jenkins agent connections
-
 networks:
   jenkins:
     driver: bridge  # Creates a custom bridge network called 'jenkins'
