@@ -64,7 +64,7 @@ pipeline {
                     git file:///workspace --since-commit HEAD --no-verification --fail > trufflehog
                     """
                     def truffle = readFile "trufflehog" 
-                     
+                      
                     if (truffle.length() == 0) {
                         echo "Good to go. No secrets found" 
                     }
