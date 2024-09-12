@@ -33,16 +33,20 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
                     script {
-
-                        def stagedFiles = sh(script: 'git diff --staged --name-only', returnStdout: true).trim()
-
                         echo "Running Trufflehog Scan"
                         sh 'rm -f trufflehog'
 
+                        // sh """ 
+                        // docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
+                        // git ${REPO_URL} --since-commit HEAD^ --branch ${CURR_BRANCH} > trufflehog
+                        // """
+
                         sh """ 
                         docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
-                        git ${REPO_URL} --branch ${CURR_BRANCH} > trufflehog
+                        git file:///workspace --since-commit HEAD^ --branch ${CURR_BRANCH} > trufflehog
                         """
+                        
+
                         def truffle = readFile "trufflehog" 
                         
                         if (truffle.length() == 0) {
