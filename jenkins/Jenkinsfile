@@ -33,6 +33,26 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
                     script {
+
+                        def stagedFiles = sh(script: 'git diff --staged --name-only', returnStdout: true).trim()
+                        
+                        if(stagedFiles) {
+                            echo "Running TruffleHog scan on the following files: ${stagedFiles}"
+
+                            sh 'rm -f trufflehog_results.txt'
+
+                            // Loop through the staged files and run TruffleHog on each
+                            for (file in stagedFiles.split('\n')) {
+                                echo "Scanning file: ${file}"
+                                
+                                // Run TruffleHog scan on each staged file using filesystem scan
+                                sh """
+                                docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
+                                filesystem --path /workspace/${file} >> trufflehog_results.txt
+                                """
+                            }
+                        }
+
                         echo "Running Trufflehog Scan"
                         sh 'rm -f trufflehog'
 
