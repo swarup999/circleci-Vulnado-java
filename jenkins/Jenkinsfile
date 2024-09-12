@@ -4,6 +4,7 @@ pipeline {
         REPO_URL = ''
         CURR_BRANCH = ''
         workspace = ''
+        relativeWorkspacePath = ''
     }
     stages {
         stage ('Checkout SCM') 
@@ -20,13 +21,19 @@ pipeline {
         stage('Setting Environment Variables') {
             steps {
                 script {
-                        echo "Getting git repo info"
-                        // Get the current repository URL
-                        REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-                        CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    echo "Getting git repo info"
+                    // Get the current repository URL
+                    REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                    CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
 
-                        sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()          
-                    }
+                    sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()          
+                }
+                script {
+                    // Replace the /var/jenkins_home prefix to make it relative
+                    relativeWorkspacePath = workspace.replace("/var/jenkins_home", "")
+                    
+                    echo "Relative Workspace Path: ${relativeWorkspacePath}"
+                }
             }   
         }
         stage('TruffleHog Secret Scan') {
@@ -42,8 +49,8 @@ pipeline {
                         // """
 
                         sh """ 
-                        docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
-                        git file:///workspace --since-commit HEAD^ --branch ${CURR_BRANCH} > trufflehog
+                        docker run --rm -v jenkins_jenkins-data:/data trufflesecurity/trufflehog:latest \
+                        git file:///data${relativeWorkspacePath} --since-commit HEAD^ --branch HEAD 
                         """
                         
 
