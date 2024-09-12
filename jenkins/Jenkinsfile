@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    parameters {
+        string(name: 'FILES_TO_SCAN', defaultValue: '.', description: 'Files or directories to scan')
+    }
     environment {
         REPO_URL = ''
         CURR_BRANCH = ''
@@ -60,7 +63,7 @@ pipeline {
                         git file:///data${relativeWorkspacePath} --since-commit HEAD^..HEAD > trufflehog
                         """
                         
-                        
+
                         def truffle = readFile "trufflehog" 
                         
                         if (truffle.length() == 0) {
