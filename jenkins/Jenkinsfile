@@ -38,7 +38,7 @@ pipeline {
                         sh 'rm -f trufflehog'
 
                         sh """ 
-                        docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD > trufflehog
+                        docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
                         """
 
                         def truffle = readFile "trufflehog" 
