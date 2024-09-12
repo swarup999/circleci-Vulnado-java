@@ -57,10 +57,10 @@ pipeline {
 
                         sh """ 
                         docker run --rm -v jenkins_jenkins-data:/data trufflesecurity/trufflehog:latest \
-                        git file:///data${relativeWorkspacePath} --since-commit HEAD > trufflehog
+                        git file:///data${relativeWorkspacePath} --since-commit HEAD^..HEAD > trufflehog
                         """
                         
-
+                        
                         def truffle = readFile "trufflehog" 
                         
                         if (truffle.length() == 0) {
