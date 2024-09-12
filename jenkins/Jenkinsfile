@@ -21,6 +21,13 @@ pipeline {
         stage('Setting Environment Variables') {
             steps {
                 script {
+
+                    def gitStatus = sh(script: 'git status', returnStdout: true).trim()
+                    
+                    // Echo the result of git status
+                    echo "Git Status:\n${gitStatus}"
+                
+
                     echo "Getting git repo info"
                     // Get the current repository URL
                     REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
