@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    parameters {
-        string(name: 'FILES_TO_SCAN', defaultValue: '.', description: 'Files or directories to scan')
-    }
     environment {
         REPO_URL = ''
         CURR_BRANCH = ''
@@ -25,24 +22,11 @@ pipeline {
             steps {
                 script {
 
-                    def gitStatus = sh(script: 'git status', returnStdout: true).trim()
-                    
-                    // Echo the result of git status
-                    echo "Git Status:\n${gitStatus}"
-                
-
                     echo "Getting git repo info"
                     // Get the current repository URL
                     REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
                     CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-
-                    sh(script: 'git rev-parse --show-toplevel', returnStdout: true).trim()          
-                }
-                script {
-                    // Replace the /var/jenkins_home prefix to make it relative
-                    relativeWorkspacePath = workspace.replace("/var/jenkins_home", "")
-                    
-                    echo "Relative Workspace Path: ${relativeWorkspacePath}"
+       
                 }
             }   
         }
@@ -53,16 +37,9 @@ pipeline {
                         echo "Running Trufflehog Scan"
                         sh 'rm -f trufflehog'
 
-                        // sh """ 
-                        // docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
-                        // git ${REPO_URL} --since-commit HEAD^ --branch ${CURR_BRANCH} > trufflehog
-                        // """
-
                         sh """ 
-                        docker run --rm -v jenkins_jenkins-data:/data trufflesecurity/trufflehog:latest \
-                        git file:///data${relativeWorkspacePath} --since-commit HEAD^..HEAD > trufflehog
+                        docker run --rm -v trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD > trufflehog
                         """
-                        
 
                         def truffle = readFile "trufflehog" 
                         
