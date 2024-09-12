@@ -38,7 +38,7 @@ pipeline {
 
                         sh """ 
                         docker run --rm -v "${workspace}:/workspace" trufflesecurity/trufflehog:latest \
-                        git ${REPO_URL} --branch ${CURR_BRANCH} --no-verification > trufflehog
+                        git ${REPO_URL} --branch ${CURR_BRANCH} > trufflehog
                         """
                         def truffle = readFile "trufflehog" 
                         
