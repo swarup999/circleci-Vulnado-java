@@ -50,7 +50,7 @@ pipeline {
 
                         sh """ 
                         docker run --rm -v jenkins_jenkins-data:/data trufflesecurity/trufflehog:latest \
-                        git file:///data${relativeWorkspacePath} --since-commit HEAD^ --branch HEAD 
+                        git file:///data${relativeWorkspacePath} --since-commit HEAD^ --branch ${CURR_BRANCH} > trufflehog
                         """
                         
 
