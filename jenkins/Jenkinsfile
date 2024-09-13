@@ -1,43 +1,31 @@
 pipeline {
     agent any
 
-    environment {
-        // Ρύθμιση των μεταβλητών περιβάλλοντος για SonarQube
-        SONAR_HOST_URL = 'http://192.168.2.11:9000'
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
             }
         }
-        stage('Build') {
+       stage('Build') {
             steps {
-                echo "Building....."
-                sh './mvnw clean install'
+                echo "Building......"
             }
         }
-        stage('SonarQube Scan') {
-            steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_LOGIN')]) {
-                    withSonarQubeEnv('jenkins-sonar2') {
-                        sh """
-                            ./mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar \
-                            -Dsonar.projectKey=my_project_key \
-                            -Dsonar.host.url=${SONAR_HOST_URL} \
-                            -Dsonar.login=${SONAR_LOGIN}
-                        """
-                    }
+        stage('Scan') {
+              steps {
+                withSonarQubeEnv(installationName: 'sonarQube1') {
+                  sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'
                 }
-            }
+              }
         }
-        stage('Test') {
+
+        stage("Test") {
             steps {
                 echo "Testing"
             }
         }
-        stage('Deliver') {
+        stage("Deliver") {
             steps {
                 echo "Deliver"
             }
@@ -47,6 +35,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
+            // Perform cleanup or archive reports
         }
         success {
             echo 'Pipeline completed successfully.'
