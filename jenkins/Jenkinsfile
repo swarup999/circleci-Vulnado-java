@@ -4,7 +4,6 @@ pipeline {
     environment {
         // Ρύθμιση των μεταβλητών περιβάλλοντος για SonarQube
         SONAR_HOST_URL = 'http://192.168.2.11:9000'
-        SONAR_LOGIN = 'jenkins-sonar2'
     }
 
     stages {
@@ -21,13 +20,15 @@ pipeline {
         }
         stage('SonarQube Scan') {
             steps {
-                withSonarQubeEnv('sonarQube1') {
-                    sh """
-                        ./mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar \
-                        -Dsonar.projectKey=my_project_key \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${SONAR_LOGIN}
-                    """
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_LOGIN')]) {
+                    withSonarQubeEnv('jenkins-sonar2') {
+                        sh """
+                            ./mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar \
+                            -Dsonar.projectKey=my_project_key \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_LOGIN}
+                        """
+                    }
                 }
             }
         }
