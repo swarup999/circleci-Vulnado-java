@@ -27,7 +27,6 @@ public class LoginController {
 }
 
 class LoginRequest implements Serializable {
-  int unusedVariable = 10;
   public String username;
   public String password;
   public void exampleMethod() {
@@ -44,7 +43,6 @@ class LoginRequest implements Serializable {
     if (x == 10) {
       return;
     }
-    return;
     // Κώδικας που δεν θα εκτελεστεί ποτέ
     System.out.println("This will never be printed");
   }
