@@ -18,8 +18,37 @@ public class Comment {
     this.created_on = created_on;
   }
 
+  //SQL INJECTION HERE ! Identified by SonarQube
+  public List<Comment> findUserComments(String username) {
+    Statement statement = null;
+    ResultSet rs = null;
+    List<Comment> comments = new ArrayList<>();
+    Connection con = null;
 
-  //Try - Catch error here
+    try {
+      con = Postgres.connection();
+      statement = con.createStatement();
+
+      // SQL INJECTION
+      String query = "SELECT * FROM comments WHERE username = '" + username + "';";
+      rs = statement.executeQuery(query);
+
+      while (rs.next()) {
+        String id = rs.getString("id");
+        String body = rs.getString("body");
+        Timestamp created_on = rs.getTimestamp("created_on");
+        Comment c = new Comment(id, username, body, created_on);
+        comments.add(c);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return comments;
+  }
+
+
+
+  //Try - Catch Should be here ! Identified by SonarQube
   private Boolean commit() throws SQLException {
     String sql = "INSERT INTO comments (id, username, body, created_on) VALUES (?,?,?,?)";
     Connection con = Postgres.connection();
@@ -29,6 +58,22 @@ public class Comment {
     pStatement.setString(3, this.body);
     pStatement.setTimestamp(4, this.created_on);
     return 1 == pStatement.executeUpdate();
+  }
+
+
+  //finally must not have return ! Identified by SonarQube
+  public static Boolean delete(String id) {
+    try {
+      String sql = "DELETE FROM comments where id = ?";
+      Connection con = Postgres.connection();
+      PreparedStatement pStatement = con.prepareStatement(sql);
+      pStatement.setString(1, id);
+      return 1 == pStatement.executeUpdate();
+    } catch(Exception e) {
+      e.printStackTrace();
+    } finally {
+      return false;
+    }
   }
 
   public static Comment create(String username, String body){
@@ -72,18 +117,5 @@ public class Comment {
     }
   }
 
-  public static Boolean delete(String id) {
-    try {
-      String sql = "DELETE FROM comments where id = ?";
-      Connection con = Postgres.connection();
-      PreparedStatement pStatement = con.prepareStatement(sql);
-      pStatement.setString(1, id);
-      return 1 == pStatement.executeUpdate();
-    } catch(Exception e) {
-      e.printStackTrace();
-    } finally {
-      return false;
-    }
-  }
 
 }
