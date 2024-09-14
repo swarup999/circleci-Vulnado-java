@@ -16,17 +16,16 @@ pipeline {
         stage('Scan') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'code-checking') {
-                        withSonarQubeEnv('sonarQube1') { // Replace with your SonarQube installation name
-                            sh './mvnw clean compile'   // Compile the code first
-                            sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes' // Run the SonarQube scan
-                        }
-                    } else {
-                        echo "Skipping SonarQube scan as this is not the 'code-checking' branch."
+                echo "${env.BRANCH_NAME}"
+                    def sonarProjectKey = "my-project-${env.BRANCH_NAME}"  // Ορισμός δυναμικού projectKey ανάλογα με το branch
+                    withSonarQubeEnv('sonarQube1') {
+                        sh './mvnw clean compile'   // Compile the code first
+                        sh "./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.projectKey=${sonarProjectKey} -Dsonar.java.binaries=target/classes" // Run the SonarQube scan
                     }
                 }
             }
         }
+
 
 
         stage("Test") {
