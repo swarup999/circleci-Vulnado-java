@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch:'code-checking', url:'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
+                git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
             }
         }
        stage('Build') {
