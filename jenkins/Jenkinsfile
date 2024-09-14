@@ -12,7 +12,8 @@ pipeline {
                 echo "Building....."
             }
         }
-       stage('Scan') {
+
+        stage('Scan') {
             steps {
                 script {
                     if (env.BRANCH_NAME == 'code-checking') {
