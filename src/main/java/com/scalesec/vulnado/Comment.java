@@ -40,10 +40,25 @@ public class Comment {
         Comment c = new Comment(id, username, body, created_on);
         comments.add(c);
       }
-    } catch (SQLException e) {
+    } catch (SQLException e) { //Not enough catch-Exception. Does not catch all the cases.
       e.printStackTrace();
     }
     return comments;
+  }
+  public void process(int value) {
+    if (value > 0) {
+      if (value < 10) {
+        System.out.println("Small value");
+      } else {
+        System.out.println("Medium value");
+      }
+    } else {
+      if (value == 0) {
+        System.out.println("Zero");
+      } else {
+        System.out.println("Negative value");
+      }
+    }
   }
 
 
