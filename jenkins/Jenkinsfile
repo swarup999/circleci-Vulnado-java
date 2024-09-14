@@ -16,7 +16,7 @@ pipeline {
         stage('Scan') {
             steps {
                 script {
-                echo "${env.BRANCH_NAME}"
+                 echo "The current branch is: ${env.BRANCH_NAME}"
                     def sonarProjectKey = "my-project-${env.BRANCH_NAME}"  // Ορισμός δυναμικού projectKey ανάλογα με το branch
                     withSonarQubeEnv('sonarQube1') {
                         sh './mvnw clean compile'   // Compile the code first
