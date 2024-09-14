@@ -31,12 +31,12 @@ public class Comment {
   ////Linter - Empty classes ! Identified by SonarQube
     class CommentImages
     {
+      class comment_InnerClass{
 
+      }
     }
 
-    class comment_InnerClass{
 
-    }
 
 
   //SQL INJECTION HERE ! Identified by SonarQube
