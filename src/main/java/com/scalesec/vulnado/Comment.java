@@ -17,6 +17,14 @@ public class Comment {
     this.body = body;
     this.created_on = created_on;
   }
+  public void unusedVariableMethod() {
+    int unused = 10; // Η μεταβλητή "unused" δεν χρησιμοποιείται ποτέ.
+    System.out.println("Hello, world!");
+  }
+  public void TESTnusedVariableMethod() {
+    int unused = 10; // Η μεταβλητή "unused" δεν χρησιμοποιείται ποτέ.
+    System.out.println("Hello, world!");
+  }
 
   //SQL INJECTION HERE ! Identified by SonarQube
   public List<Comment> findUserComments(String username) {
