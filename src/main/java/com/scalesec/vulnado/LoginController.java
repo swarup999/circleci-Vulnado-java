@@ -36,15 +36,14 @@ class LoginRequest implements Serializable {
     }
     return;
     // Κώδικας που δεν θα εκτελεστεί ποτέ
-    System.out.println("This will never be printed");
+    //System.out.println("This will never be printed");
   }
   public void exampleMethod2() {
     int x = 10;
     if (x == 10) {
       return;
     }
-    // Κώδικας που δεν θα εκτελεστεί ποτέ
-    System.out.println("This will never be printed");
+   return;
   }
 
 
