@@ -29,24 +29,6 @@ public class LoginController {
 class LoginRequest implements Serializable {
   public String username;
   public String password;
-  public void exampleMethod() {
-    int x = 10;
-    if (x == 10) {
-      return;
-    }
-    return;
-    // Κώδικας που δεν θα εκτελεστεί ποτέ
-    //System.out.println("This will never be printed");
-  }
-  public void exampleMethod2() {
-    int x = 10;
-    if (x == 10) {
-      return;
-    }
-   return;
-    System.out.println("TEEEEEEEEEEEEST");
-  }
-
 
 }
 
