@@ -16,8 +16,8 @@ pipeline {
         stage('Scan') {
             steps {
                 script {
-                 echo "The current branch is: ${env.GIT_BRANCH}"
-                    def sonarProjectKey = "my-project-${env.GIT_BRANCH}"  // Ορισμός δυναμικού projectKey ανάλογα με το branch
+                    // Αντικαθιστούμε το "/" με "-"
+                    def sonarProjectKey = "my-project-origin-${env.BRANCH_NAME.replaceAll('/', '-')}"
                     withSonarQubeEnv('sonarQube1') {
                         sh './mvnw clean compile'   // Compile the code first
                         sh "./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.projectKey=${sonarProjectKey} -Dsonar.java.binaries=target/classes" // Run the SonarQube scan
@@ -25,6 +25,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
