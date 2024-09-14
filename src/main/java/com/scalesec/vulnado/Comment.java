@@ -19,27 +19,16 @@ public class Comment {
   }
 
 
-  //SQL INJECTION HERE
+  //Try - Catch error here
   private Boolean commit() throws SQLException {
-    String sql = "INSERT INTO comments (id, username, body, created_on) VALUES (this.id,this.username,this.body,this.created_on)";
+    String sql = "INSERT INTO comments (id, username, body, created_on) VALUES (?,?,?,?)";
     Connection con = Postgres.connection();
-    Statement statement = con.createStatement();
-    return 1 == statement.executeUpdate(sql);
-  }
-  public void process(int value) {
-    if (value > 0) {
-      if (value < 10) {
-        System.out.println("Small value");
-      } else {
-        System.out.println("Medium value");
-      }
-    } else {
-      if (value == 0) {
-        System.out.println("Zero");
-      } else {
-        System.out.println("Negative value");
-      }
-    }
+    PreparedStatement pStatement = con.prepareStatement(sql);
+    pStatement.setString(1, this.id);
+    pStatement.setString(2, this.username);
+    pStatement.setString(3, this.body);
+    pStatement.setTimestamp(4, this.created_on);
+    return 1 == pStatement.executeUpdate();
   }
 
   public static Comment create(String username, String body){
