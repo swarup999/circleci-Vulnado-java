@@ -17,13 +17,29 @@ public class Comment {
     this.body = body;
     this.created_on = created_on;
   }
+  //Linter unusedVariable inside ! Identified by SonarQube
   public void unusedVariableMethod() {
-    int unused = 10; // Η μεταβλητή "unused" δεν χρησιμοποιείται ποτέ.
-    System.out.println("Hello, world!");
+    int unused = 10;
+    System.out.println("One useless comment!");
   }
-  public void TESTnusedVariableMethod() {
-    int unused = 10; // Η μεταβλητή "unused" δεν χρησιμοποιείται ποτέ.
-    System.out.println("Hello, world!");
+  //Linter - Incorrect method name ! Identified by SonarQube
+  public void FalseNameMethod() {
+    System.out.println("There are many comments in the DB");
+  }
+
+  ////Linter - Same body methods ! Identified by SonarQube
+  public void testMethod() {
+    System.out.println("There are many comments in the DB");
+  }
+
+  ////Linter - Empty classes ! Identified by SonarQube
+    class CommentImages
+    {
+
+    }
+  ////Linter - Long line ! Identified by SonarQube
+  public void longLineMethod() {
+    System.out.println("The first patented printing mechanism for applying a marking medium to a recording medium or more particularly an electrostatic inking apparatus and a method for electrostatically depositing ink on controlled areas of a receiving medium, was in 1962 by C. R. Winston, Teletype Corporation, using continuous inkjet printing. The ink was a red stamp-pad ink manufactured by Phillips Process Company of Rochester, NY under the name Clear Print. This patent (US3060429) led to the Teletype Inktronic Printer product delivered to customers in late 1966.");
   }
 
   //SQL INJECTION HERE ! Identified by SonarQube
