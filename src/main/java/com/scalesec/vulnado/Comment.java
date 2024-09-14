@@ -28,11 +28,11 @@ public class Comment {
   }
 
 
-  ////Linter - Empty classes ! Identified by SonarQube
+  ////Linter - False name - classes ! Identified by SonarQube
     class CommentImages
     {
       class comment_InnerClass{
-
+        //empty class also...
       }
     }
 
