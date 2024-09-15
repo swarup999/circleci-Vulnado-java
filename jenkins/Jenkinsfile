@@ -65,10 +65,13 @@ pipeline {
         }
         stage(' Sonar Cube Scan') {
              steps {
-                withSonarQubeEnv(installationName: 'sonarQube1') {
-                    sh './mvnw clean compile'   // Compile the code first
-                    sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes' // Run the SonarQube scan
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
+                    withSonarQubeEnv(installationName: 'sonarQube1') {
+                        sh './mvnw clean compile'   // Compile the code first
+                        sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes' // Run the SonarQube scan
+                    }
                 }
+                
             }
         }              
         stage('Check and build Docker Images') {
@@ -140,31 +143,40 @@ pipeline {
         }             
         stage('SQL map endpoints scan') {
             steps {
-                withFileParameter('endpoints') {
-                    sh """
-                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}/jenkins/sqlmap/endpoints.txt --batch > sqlmap
-                    """
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withFileParameter('endpoints') {
+                        sh """
+                        docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}/jenkins/sqlmap/endpoints.txt --batch > sqlmap
+                        """
 
+                    }
                 }
+                
             }
         }
         stage('Run Nmap - Opened Gates') {
             steps {
-                script {
-                    sh """
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -p- 192.168.2.11
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        sh """
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -p- 192.168.2.11
 
-                    """
+                        """
+                    }
                 }
+                
             }
         }
         stage('Run Nmap - Vuln Scan') {
             steps {
-                script {
-                    sh """
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -sV --script vuln 192.168.2.11
-                    """
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        sh """
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -sV --script vuln 192.168.2.11
+                        """
+                    }
                 }
+                
             }
         }   
         stage('Clean up') {
