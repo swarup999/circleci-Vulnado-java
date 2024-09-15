@@ -30,7 +30,7 @@ pipeline {
         stage('NMAP') {
                     steps {
                         script {
-                    docker run --rm instrumentisto/nmap nmap -sV -p 1-65535 172.17.0.1
+                    docker run --rm instrumentisto/nmap nmap -sV -p 1-65535 "172.17.0.1"
                             }
                     }
                 }
