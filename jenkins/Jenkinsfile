@@ -35,7 +35,7 @@ pipeline {
                 stage('Run Nmap') {
                     agent {
                         docker {
-                            image 'myjenkins-nmap'
+                            sh 'docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v'
                         }
                     }
                     steps {
