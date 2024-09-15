@@ -38,114 +38,107 @@ pipeline {
                 }
             }
         }
-        stage('Secrets,Docker Image and SQL Injection Scan'){ 
-            parallel {
-                stage('TruffleHog Secret Scan') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
-                            script {
-                                echo "Running Trufflehog Scan"
-                                sh 'rm -f trufflehog'
 
-                                sh """ 
-                                docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
-                                """
+        stage('TruffleHog Secret Scan') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
+                    script {
+                        echo "Running Trufflehog Scan"
+                        sh 'rm -f trufflehog'
 
-                                def truffle = readFile "trufflehog" 
-                                
-                                if (truffle.length() == 0) {
-                                    echo "Good to go. No secrets found" 
-                                }
-                                else {
-                                    echo "Warning! Secrets are committed into your git repository."
-                                    error("Secrets might be committed into your git repo")
-                                }
-                            }
+                        sh """ 
+                        docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
+                        """
+
+                        def truffle = readFile "trufflehog" 
+                        
+                        if (truffle.length() == 0) {
+                            echo "Good to go. No secrets found" 
+                        }
+                        else {
+                            echo "Warning! Secrets are committed into your git repository."
+                            error("Secrets might be committed into your git repo")
                         }
                     }
                 }
-                stage('Docker Image Vulnerability Scan') {
-                    stages {
-                        stage('Check and build Docker Images') {
-                            steps {
-                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
-                                    script {
-                                        def images = []
+            }
+        }               
+        stage('Check and build Docker Images') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
+                    script {
+                        def images = []
 
-                                        if (dockerComposePath?.trim()) {
-                                            // If dockerComposePath is provided, run docker-compose to build images
-                                            echo "Docker Compose file detected. Building images using docker-compose..."
-                                            sh """
-                                                docker compose -f ${workspace}/${dockerComposePath} build --parallel
-                                            """
-                                            
-                                            // Get repository and tag of the images created by docker-compose
-                                            images = sh(script: """
-                                                docker compose -f ${workspace}/${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
-                                            """, returnStdout: true).trim().split("\n")                       
-
-                                        } else if (dockerfilePath?.trim()) {
-                                            // If dockerComposePath is NOT provided, build the Docker image using the Dockerfile
-                                            echo "Dockerfile detected. Building image using docker build..."
-                                            
-                                            def imageName = "my_image:latest" // You can customize the image name as needed
-                                            sh """
-                                                docker build -t ${imageName} -f ${dockerfilePath} .
-                                            """
-                                            
-                                            echo "Image built from Dockerfile: ${imageName}"
-                                            images << imageName
-                                        } else {
-                                            error "No Dockerfile or Docker Compose file provided. Please provide at least one."
-                                        }
-
-                                        // Save images to an environment variable for later stages
-                                        IMAGES = images.join(",")
-                                    }
-                                }
-                            }
-                        }
-                        stage('Snyk Docker Image vulnerability scan') {
-                            steps {
-                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                    script {
-                                        def images = []
-                                        if (IMAGES && IMAGES.trim()) {
-                                            images = IMAGES.split(",")
-                                        }
-                                        else {
-                                            error "No images to scan with Snyk"
-                                        }
-
-                                        for (image in images) {
-                                            def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
-
-                                            echo "Scanning image: ${image} using Snyk..."
-
-                                            sh "rm -f snyk_${sanitizedImageName}"
-
-                                            sh """
-                                                docker run --rm -it --env ${SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
-                                                snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all > snyk_${sanitizedImageName}
-                                            """
-                                        }
-                                    }
-                                }
-                            }
-                        }    
-                    }  
-                }
-                stage('SQL map endpoints scan') {
-                    steps {
-                        withFileParameter('endpoints') {
+                        if (dockerComposePath?.trim()) {
+                            // If dockerComposePath is provided, run docker-compose to build images
+                            echo "Docker Compose file detected. Building images using docker-compose..."
                             sh """
-                            docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -d endpoints.txt --batch > sqlmap
+                                docker compose -f ${workspace}/${dockerComposePath} build --parallel
+                            """
+                            
+                            // Get repository and tag of the images created by docker-compose
+                            images = sh(script: """
+                                docker compose -f ${workspace}/${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
+                            """, returnStdout: true).trim().split("\n")                       
+
+                        } else if (dockerfilePath?.trim()) {
+                            // If dockerComposePath is NOT provided, build the Docker image using the Dockerfile
+                            echo "Dockerfile detected. Building image using docker build..."
+                            
+                            def imageName = "my_image:latest" // You can customize the image name as needed
+                            sh """
+                                docker build -t ${imageName} -f ${dockerfilePath} .
+                            """
+                            
+                            echo "Image built from Dockerfile: ${imageName}"
+                            images << imageName
+                        } else {
+                            error "No Dockerfile or Docker Compose file provided. Please provide at least one."
+                        }
+
+                        // Save images to an environment variable for later stages
+                        IMAGES = images.join(",")
+                    }
+                }
+            }
+        }
+        stage('Snyk Docker Image vulnerability scan') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        def images = []
+                        if (IMAGES && IMAGES.trim()) {
+                            images = IMAGES.split(",")
+                        }
+                        else {
+                            error "No images to scan with Snyk"
+                        }
+
+                        for (image in images) {
+                            def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
+
+                            echo "Scanning image: ${image} using Snyk..."
+
+                            sh "rm -f snyk_${sanitizedImageName}"
+
+                            sh """
+                                docker run --rm -it --env ${SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
+                                snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all > snyk_${sanitizedImageName}
                             """
                         }
                     }
                 }
             }
-        }   
+        }             
+        stage('SQL map endpoints scan') {
+            steps {
+                withFileParameter('endpoints') {
+                    sh """
+                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}/jenkins/sqlmap/endpoints.txt --batch > sqlmap
+                    """
+                }
+            }
+        }  
         stage('Clean up') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
@@ -163,15 +156,11 @@ pipeline {
                             mv snyk_${sanitizedImageName} ${REPORT_DIR}/ || true
                             """
                         }
-                    }
-
-                      
+                    }        
                 }
             }
-        }
-        
+        } 
     }
-
     post {
         always {
             echo 'Cleaning up...'
