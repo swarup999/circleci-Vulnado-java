@@ -29,9 +29,7 @@ pipeline {
 
         stage('Build Docker Image') {
                     steps {
-                        script {
-                            docker.build('myjenkins-nmap')
-                        }
+                         sh 'docker --version'
                     }
                 }
                 stage('Run Nmap') {
