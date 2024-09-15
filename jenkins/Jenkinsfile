@@ -31,7 +31,7 @@ pipeline {
                     steps {
                         script {
                             docker.image('nmap-image').inside {
-                                sh 'nmap -v -A scanme.nmap.org'
+                                sh 'nmap'
                             }
                         }
                     }
