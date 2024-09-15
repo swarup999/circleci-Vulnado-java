@@ -27,15 +27,15 @@ pipeline {
                         }
         }
 
-        stage('NMAP') {
+        stage('Nmap Scan') {
                     steps {
                         script {
-                                sh 'nmap'
+                            docker.image('nmap-image').inside {
+                                sh 'nmap -v -A scanme.nmap.org'
                             }
+                        }
                     }
                 }
-
-
 
         stage("Test") {
             steps {
