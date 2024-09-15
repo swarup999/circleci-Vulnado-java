@@ -27,22 +27,11 @@ pipeline {
                         }
         }
 
-        stage('Build Docker Image ') {
+        stage('Version Docker ') {
                     steps {
                          sh 'docker --version'
                     }
                 }
-
-            stage('Run Nmap - Vuln Scan') {
-                        steps {
-                            script {
-                                sh """
-                                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -sV --script vuln default
-                                """
-                            }
-                        }
-                    }
-
 
 
 
