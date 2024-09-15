@@ -30,7 +30,7 @@ pipeline {
         stage('NMAP') {
                     steps {
                         script {
-                            apt-get install nmap
+                                sh 'nmap'
                             }
                     }
                 }
