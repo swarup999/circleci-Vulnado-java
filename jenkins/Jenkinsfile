@@ -1,8 +1,8 @@
 pipeline {
     agent any
     parameters {
-        string(name: 'dockerComposePath', value: "", description: "Path of the docker-compose.yml"),
-        string(name: 'dockerfilePath', value: "", description: "Path of the Dockerfile"),
+        string name: 'dockerComposePath', default: "", description: "Path of the docker-compose.yml"
+        string name: 'dockerfilePath', default: "", description: "Path of the Dockerfile"
         base64File description: 'File containing the endpoints to be tested by SQLmap', name: 'endpoints'
     }
     environment {
