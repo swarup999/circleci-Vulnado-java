@@ -149,7 +149,7 @@ pipeline {
                         mv snyk_${sanitizedImageName} ${REPORT_DIR}/ || true
                         """
                     }
-                    
+                     
                 }
             }
         }
