@@ -83,7 +83,7 @@ pipeline {
                             sh """
                                 docker compose -f ${workspace}/${dockerComposePath} build --parallel
                             """
-                            
+                             
                             // Get repository and tag of the images created by docker-compose
                             images = sh(script: """
                                 docker compose -f ${workspace}/${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
@@ -144,7 +144,7 @@ pipeline {
                     sh """
                     docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}/jenkins/sqlmap/endpoints.txt --batch > sqlmap
                     """
-                    
+
                 }
             }
         }
