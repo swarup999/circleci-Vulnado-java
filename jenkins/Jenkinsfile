@@ -75,11 +75,18 @@ pipeline {
             }    
         }
         stage('TruffleHog Secret Scan') {
+            agent {
+                docker { image 'trufflesecurity/trufflehog:latest' }
+            }
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
                     script {
                         echo "Running Trufflehog Scan"
                         sh 'rm -f trufflehog'
+
+                        // sh """ 
+                        // docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
+                        // """
 
                         sh """ 
                         docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
@@ -92,7 +99,7 @@ pipeline {
                         }
                         else {
                             echo "Warning! Secrets are committed into your git repository."
-                            throw new Exception("Secrets might be committed into your git repo")
+                            error("Secrets might be committed into your git repo")
                         }
                     }
                 }
