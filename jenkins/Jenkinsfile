@@ -1,9 +1,9 @@
 pipeline {
     agent any
-    parameters {
-        string name: 'dockerComposePath', defaultValue: "", description: "Path of the docker-compose.yml"
-        string name: 'dockerfilePath', defaultValue: "", description: "Path of the Dockerfile"
-        base64File description: 'File containing the endpoints to be tested by SQLmap', name: 'endpoints'
+    parameters{
+        string(name: 'dockerComposePath', defaultValue: '', description: 'Path of the docker-compose.yml')
+        string(name: 'dockerfilePath', defaultValue: '', description: 'Path of the Dockerfile')
+        string(name: 'endpointsPath', defaultValue: '', description: 'Path of the endpoints to test SQLmap')       
     }
     environment {
         REPO_URL = ''
@@ -11,7 +11,7 @@ pipeline {
         workspace = ''
         relativeWorkspacePath = ''
         SNYK_TOKEN = credentials('snyk-token')
-        IMAGES = ''
+        images_string = ''
     }
     stages {
         stage ('Checkout SCM') 
@@ -29,16 +29,6 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
                     script {
-                        // Print parameters
-                        withFileParameter('endpoints') {
-                            sh 'cat $endpoints'
-                        }
-                        echo endpoints
-                        echo dockerComposePath
-                        echo dockerfilePath
-
-
-
                         echo "Getting git repo info"
                         // Get the current repository URL
                         REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
@@ -93,12 +83,12 @@ pipeline {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
                             sh """
-                                docker compose -f ${workspace}/${dockerComposePath} build --parallel
+                                docker compose -f ${workspace}/${params.dockerComposePath} build --parallel
                             """
                              
                             // Get repository and tag of the images created by docker-compose
                             images = sh(script: """
-                                docker compose -f ${workspace}/${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
+                                docker compose -f ${workspace}/${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
                             """, returnStdout: true).trim().split("\n")                       
 
                         } else if (dockerfilePath?.trim()) {
@@ -107,7 +97,7 @@ pipeline {
                             
                             def imageName = "my_image:latest" // You can customize the image name as needed
                             sh """
-                                docker build -t ${imageName} -f ${dockerfilePath} .
+                                docker build -t ${imageName} -f ${params.dockerfilePath} .
                             """
                             
                             echo "Image built from Dockerfile: ${imageName}"
@@ -117,7 +107,7 @@ pipeline {
                         }
 
                         // Save images to an environment variable for later stages
-                        env.IMAGES = images.join(",")
+                        images_string = images.join(",")
                     }
                 }
             }
@@ -127,8 +117,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         def images = []
-                        if (env.IMAGES && env.IMAGES.trim()) {
-                            images = env.IMAGES.split(",")
+                        if (images_string && images_string.trim()) {
+                            images = images_string.split(",")
                         }
                         else {
                             error "No images to scan with Snyk"
@@ -152,13 +142,10 @@ pipeline {
         }             
         stage('SQL map endpoints scan') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    withFileParameter('endpoints') {
-                        sh """
-                        docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}/jenkins/sqlmap/endpoints.txt --batch > sqlmap
-                        """
-
-                    }
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {    
+                    sh """
+                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}${params.endpointsPath} --batch > sqlmap
+                    """    
                 }
                 
             }
