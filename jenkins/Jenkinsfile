@@ -83,12 +83,12 @@ pipeline {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
                             sh """
-                                docker compose -f ${workspace}/${params.dockerComposePath} build --parallel
+                                docker compose -f ${workspace}${params.dockerComposePath} build --parallel
                             """
                              
                             // Get repository and tag of the images created by docker-compose
                             images = sh(script: """
-                                docker compose -f ${workspace}/${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
+                                docker compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
                             """, returnStdout: true).trim().split("\n")                       
 
                         } else if (dockerfilePath?.trim()) {
@@ -117,8 +117,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         def images = []
-                        if (images_string && images_string.trim()) {
-                            images = images_string.split(",")
+                        if (${images_string} && ${images_string}.trim()) {
+                            images = ${images_string}.split(",")
                         }
                         else {
                             error "No images to scan with Snyk"
@@ -144,8 +144,9 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {    
                     sh """
-                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}${params.endpointsPath} --batch > sqlmap
-                    """    
+                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}${params.endpointsPath} --batch 
+                    """  
+                    //> sqlmap  
                 }
                 
             }
