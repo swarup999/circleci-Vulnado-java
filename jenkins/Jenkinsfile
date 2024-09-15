@@ -12,7 +12,7 @@ pipeline {
         relativeWorkspacePath = ''
         SNYK_TOKEN = credentials('snyk-token')
         images_string = ''
-    }
+    } 
     stages {
         stage ('Checkout SCM') 
         {
