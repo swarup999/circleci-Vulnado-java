@@ -26,13 +26,15 @@ pipeline {
         }
         stage('Setting Environment Variables') {
             steps {
-                script {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
+                    script {
 
-                    echo "Getting git repo info"
-                    // Get the current repository URL
-                    REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-                    CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                }  
+                        echo "Getting git repo info"
+                        // Get the current repository URL
+                        REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                        CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    }  
+                }
             }
         }   
         stage('Check and build Docker Images') {
