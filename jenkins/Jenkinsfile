@@ -27,14 +27,21 @@ pipeline {
                         }
         }
 
-        stage('Nmap Scan') {
+        stage('Build Docker Image') {
                     steps {
                         script {
-                          docker.image('instrumentisto/nmap').inside {
-                                                  // Run the Nmap command (change the target as needed)
-                                                  sh 'nmap -sP 192.168.1.1/24'
-                                              }
+                            docker.build('myjenkins-nmap')
                         }
+                    }
+                }
+                stage('Run Nmap') {
+                    agent {
+                        docker {
+                            image 'myjenkins-nmap'
+                        }
+                    }
+                    steps {
+                        sh 'nmap -v scanme.nmap.org'
                     }
                 }
 
