@@ -38,7 +38,7 @@ pipeline {
                 }
             }
         }
-        stage('Secret Scanning, Image vulnerability Scanning and SQL Injection Scanning'){ 
+        stage('Secrets,Docker Image and SQL Injection Scan'){ 
             parallel {
                 stage('TruffleHog Secret Scan') {
                     steps {
