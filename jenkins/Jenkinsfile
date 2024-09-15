@@ -11,6 +11,7 @@ pipeline {
         workspace = ''
         relativeWorkspacePath = ''
         SNYK_TOKEN = credentials('snyk-token')
+        IMAGES = ''
     }
     stages {
         stage ('Checkout SCM') 
@@ -75,12 +76,12 @@ pipeline {
                                             // If dockerComposePath is provided, run docker-compose to build images
                                             echo "Docker Compose file detected. Building images using docker-compose..."
                                             sh """
-                                                docker compose -f ${dockerComposePath} build --parallel
+                                                docker compose -f ${workspace}/${dockerComposePath} build --parallel
                                             """
                                             
                                             // Get repository and tag of the images created by docker-compose
                                             images = sh(script: """
-                                                docker compose -f ${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
+                                                docker compose -f ${workspace}/${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
                                             """, returnStdout: true).trim().split("\n")                       
 
                                         } else if (dockerfilePath?.trim()) {
@@ -99,7 +100,7 @@ pipeline {
                                         }
 
                                         // Save images to an environment variable for later stages
-                                        env.IMAGES = images.join(",")
+                                        IMAGES = images.join(",")
                                     }
                                 }
                             }
@@ -108,8 +109,13 @@ pipeline {
                             steps {
                                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                     script {
-                                        // Use Snyk to scan each image
-                                        def images = env.IMAGES.split(",")
+                                        def images = []
+                                        if (IMAGES && IMAGES.trim()) {
+                                            images = IMAGES.split(",")
+                                        }
+                                        else {
+                                            error "No images to scan with Snyk"
+                                        }
 
                                         for (image in images) {
                                             def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
@@ -158,7 +164,7 @@ pipeline {
                             """
                         }
                     }
-                        
+
                       
                 }
             }
