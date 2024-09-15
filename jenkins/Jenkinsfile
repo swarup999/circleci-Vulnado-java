@@ -30,9 +30,10 @@ pipeline {
         stage('Nmap Scan') {
                     steps {
                         script {
-                            docker.image('nmap-image').inside {
-                                sh 'nmap'
-                            }
+                          docker.image('instrumentisto/nmap').inside {
+                                                  // Run the Nmap command (change the target as needed)
+                                                  sh 'nmap -sP 192.168.1.1/24'
+                                              }
                         }
                     }
                 }
