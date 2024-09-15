@@ -30,10 +30,7 @@ pipeline {
         stage('NMAP') {
                     steps {
                         script {
-                            sh '''
-                               echo "Installing Nmap..."
-                               sudo apt-get update && sudo apt-get install -y nmap
-                               '''
+                            sh 'nmap'
                         }
                     }
                 }
