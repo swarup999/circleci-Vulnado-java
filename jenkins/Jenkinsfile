@@ -18,7 +18,7 @@ pipeline {
             }
         }
 
-        stage('Scan') {
+        stage(' Sonar Cube Scan') {
              steps {
                             withSonarQubeEnv(installationName: 'sonarQube1') {
                                 sh './mvnw clean compile'   // Compile the code first
@@ -26,6 +26,14 @@ pipeline {
                             }
                         }
         }
+        stage('Pull Docker Image') {
+                    steps {
+                        script {
+                            // Pull the Nmap Docker image
+                            sh 'docker pull instrumentisto/nmap'
+                        }
+                    }
+                }
 
 
 
