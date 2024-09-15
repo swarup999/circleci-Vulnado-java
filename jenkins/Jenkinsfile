@@ -139,9 +139,7 @@ pipeline {
         stage('Clean up') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    script {
-                        
-                    }
+                
                 }
             }
         }
