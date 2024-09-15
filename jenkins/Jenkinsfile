@@ -33,26 +33,6 @@ pipeline {
                     }
                 }
 
-            stage('Run Nmap - Opened Gates') {
-                        steps {
-                            script {
-                                sh """
-                                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -p- 192.168.2.11
-
-                                """
-                            }
-                        }
-                    }
-                    stage('Run Nmap - Vuln Scan') {
-                        steps {
-                            script {
-                                sh """
-                                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image_3:latest -sV --script vuln 192.168.2.11
-
-                                """
-                            }
-                        }
-                    }
 
 
 
