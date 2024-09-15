@@ -32,6 +32,14 @@ pipeline {
                          sh 'docker --version'
                     }
                 }
+           stage('Run Nmap') {
+                steps {
+                    sh """
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v
+
+                    """
+                }
+            }
 
 
 
