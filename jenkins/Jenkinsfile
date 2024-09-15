@@ -80,7 +80,7 @@ pipeline {
             agent {
                 docker { 
                     image 'trufflesecurity/trufflehog:latest' 
-                    args '-v "/var/run/docker.sock:/var/run/docker.sock"'  // Ensure Docker socket is mounted
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Ensure Docker socket is mounted
                 }
             }
             steps {
