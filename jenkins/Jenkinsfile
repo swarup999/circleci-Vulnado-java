@@ -77,21 +77,11 @@ pipeline {
             }    
         }
         stage('TruffleHog Secret Scan') {
-            agent {
-                docker { 
-                    image 'trufflesecurity/trufflehog:latest' 
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Ensure Docker socket is mounted
-                }
-            }
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
                     script {
                         echo "Running Trufflehog Scan"
                         sh 'rm -f trufflehog'
-
-                        // sh """ 
-                        // docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
-                        // """
 
                         sh """ 
                         docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
@@ -108,11 +98,6 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        stage('Build') {
-            steps {
-                echo "Building"
             }
         }
         stage('Snyk Docker Image vulnerability scan') {
@@ -142,8 +127,7 @@ pipeline {
             steps {
                 withFileParameter('endpoints') {
                     sh """
-                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest \
-                    -u "http://testphp.vulnweb.com/artists.php?artist=1%27" --batch
+                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -d endpoints.txt --batch > sqlmap
                     """
                 }
             }
@@ -151,7 +135,21 @@ pipeline {
         stage('Clean up') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                
+                    def images = env.IMAGES.split(",")
+                    sh """
+                        REPORT_DIR="reports/${JOB_NAME}_${BUILD_NUMBER}"
+                        mkdir -p ${REPORT_DIR}
+
+                        mv trufflehog ${REPORT_DIR}/ || true
+                        mv sqlmap ${REPORT_DIR}/ || true
+                    """
+                    for (image in images) {
+                        def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
+                        sh """
+                        mv snyk_${sanitizedImageName} ${REPORT_DIR}/ || true
+                        """
+                    }
+                    
                 }
             }
         }
@@ -161,7 +159,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            // Perform cleanup or archive reports
+            
         }
         success {
             echo 'Pipeline completed successfully.'
