@@ -124,9 +124,6 @@ pipeline {
                         }
                     }
                 }
-                script {
-                    // TODO: Add the exception if a vulnerability is found in the file.
-                }
             }
         }
         stage('SQL map endpoints scan') {
