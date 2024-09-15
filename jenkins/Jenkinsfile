@@ -30,8 +30,8 @@ pipeline {
         stage('NMAP') {
                     steps {
                         script {
-                            sh 'docker'
-                        }
+                            docker run --rm --network="host" instrumentisto/nmap nmap -sV -p 1-65535 localhost
+                            }
                     }
                 }
 
