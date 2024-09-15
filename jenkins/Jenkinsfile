@@ -47,12 +47,12 @@ pipeline {
                             // If dockerComposePath is provided, run docker-compose to build images
                             echo "Docker Compose file detected. Building images using docker-compose..."
                             sh """
-                                docker-compose -f ${dockerComposePath} build --parallel
+                                docker compose -f ${dockerComposePath} build --parallel
                             """
                             
                             // Get repository and tag of the images created by docker-compose
                             images = sh(script: """
-                                docker-compose -f ${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
+                                docker compose -f ${dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
                             """, returnStdout: true).trim().split("\n")                       
 
                         } else if (dockerfilePath?.trim()) {
