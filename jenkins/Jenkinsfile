@@ -26,6 +26,15 @@ pipeline {
                             }
                         }
         }
+        stage('Install Nmap') {
+                    steps {
+                        script {
+                            sh '''
+                            echo "Installing Nmap..."
+                            sudo apt-get update && sudo apt-get install -y nmap
+                            '''
+                        }
+                    }
         stage('Pull Docker Image') {
                     steps {
                         script {
