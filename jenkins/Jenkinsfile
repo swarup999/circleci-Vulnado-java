@@ -118,7 +118,7 @@ pipeline {
                             sh "rm -f snyk_${sanitizedImageName}"
 
                             sh """
-                                docker run --rm -it --env ${SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \ 
+                                docker run --rm -it --env ${SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
                                 snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all > snyk_${sanitizedImageName}
                             """
                         }
@@ -133,7 +133,7 @@ pipeline {
             steps {
                 withFileParameter('endpoints') {
                     sh """
-                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest \ 
+                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest \
                     -u "http://testphp.vulnweb.com/artists.php?artist=1%27" --batch
                     """
                 }
