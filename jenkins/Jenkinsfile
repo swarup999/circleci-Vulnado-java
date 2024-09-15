@@ -27,17 +27,13 @@ pipeline {
                         }
         }
 
-        stage('Build Docker Image') {
+       stage('Run Nmap') {
                     steps {
-                         sh 'docker --version'
-                    }
-                }
-
-                stage('Run Nmap') {
-                    steps {
+                       script {
                         sh """
                         docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v
                         """
+                        }
                     }
                 }
 
