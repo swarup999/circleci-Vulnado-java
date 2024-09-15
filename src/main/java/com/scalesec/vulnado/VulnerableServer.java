@@ -1,55 +1,34 @@
 package com.scalesec.vulnado;
-
 import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class VulnerableServer {
+    public static void main(String[] args) throws Exception {
+        // Open a server on port 8080
+        ServerSocket serverSocket = new ServerSocket(8082);
+        System.out.println("Server started on port 8082");
 
-    public static void main(String[] args) {
-        // Ανοιχτές θύρες για ακούσματα
-        openPort(8080);  // HTTP θύρα
-        openPort(3306);  // MySQL θύρα
-        openPort(21);    // FTP θύρα
-    }
-
-    public static void openPort(int port) {
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("Listening on port " + port);
-
-            // Ο Server παραμένει σε αναμονή για συνδέσεις
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                handleClient(clientSocket);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void handleClient(Socket clientSocket) {
-        try {
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            // Διαβάζει δεδομένα από τον client
-            String clientInput = in.readLine();
-            System.out.println("Received: " + clientInput);
+            // Vulnerability 1: Command Injection
+            out.println("Enter a command to execute: ");
+            String command = in.readLine();
 
-            // SQL Injection Vulnerability: υποθετικό παράδειγμα χειρισμού εισόδου χωρίς έλεγχο
-            String query = "SELECT * FROM users WHERE username = '" + clientInput + "';";
-            System.out.println("Executing query: " + query);
+            // Unsafe execution of system commands
+            Process process = Runtime.getRuntime().exec(command);  // Command Injection vulnerability
+            BufferedReader processOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-            // Απαντάει στον client
-            out.println("Query Executed: " + query);
-
-            // Χωρίς κρυπτογράφηση δεδομένων
-            out.println("Plain-text response: No encryption used here!");
+            String line;
+            out.println("Command output:");
+            while ((line = processOutput.readLine()) != null) {
+                out.println(line);
+            }
 
             clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
