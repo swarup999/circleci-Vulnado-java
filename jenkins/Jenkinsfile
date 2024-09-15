@@ -30,7 +30,7 @@ pipeline {
         stage('NMAP') {
                     steps {
                         script {
-                            sh 'nmap'
+                            sh 'docker'
                         }
                     }
                 }
