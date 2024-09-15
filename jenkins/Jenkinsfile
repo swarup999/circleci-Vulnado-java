@@ -30,7 +30,7 @@ pipeline {
                     steps {
                         script {
                             // Pull the Nmap Docker image
-                            sh 'docker pull instrumentisto/nmap'
+                            sh 'docker'
                         }
                     }
                 }
