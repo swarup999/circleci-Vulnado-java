@@ -23,7 +23,7 @@ pipeline {
                         workspace = pwd ()
                     } 
                 }
-            }
+            } 
         }
         stage('Setting Environment Variables') {
             steps {
