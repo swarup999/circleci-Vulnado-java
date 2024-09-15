@@ -18,31 +18,14 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            steps {
-                withSonarQubeEnv(installationName: 'sonarQube1') {
-                    script {
-                        echo "Running SonarQube Scan"
-
-                        sh 'rm -f sonar-report.txt'
-
-                        // Compile the code
-                        sh './mvnw clean compile'
-
-                        sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes > sonar-report.txt'
-
-                        def sonarReport = readFile 'sonar-report.txt'
-
-                        if (sonarReport.length() == 0) {
-                            echo "SonarQube Scan completed successfully. No issues found."
-                        } else {
-                            echo "SonarQube scan found issues. Check the report."
+        stage(' Sonar Cube Scan') {
+             steps {
+                            withSonarQubeEnv(installationName: 'sonarQube1') {
+                                sh './mvnw clean compile'   // Compile the code first
+                                sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes' // Run the SonarQube scan
+                            }
                         }
-                    }
-                }
-            }
         }
-
 
         stage('Version Docker ') {
                     steps {
