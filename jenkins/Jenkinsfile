@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
     parameters {
         string name: 'dockerComposePath', defaultValue: "", description: "Path of the docker-compose.yml"
         string name: 'dockerfilePath', defaultValue: "", description: "Path of the Dockerfile"
@@ -76,7 +76,10 @@ pipeline {
         }
         stage('TruffleHog Secret Scan') {
             agent {
-                docker { image 'trufflesecurity/trufflehog:latest' }
+                docker { 
+                    image 'trufflesecurity/trufflehog:latest' 
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Ensure Docker socket is mounted
+                }
             }
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {                
