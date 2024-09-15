@@ -32,14 +32,10 @@ pipeline {
                          sh 'docker --version'
                     }
                 }
+
                 stage('Run Nmap') {
-                    agent {
-                        docker {
-                            sh 'docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v'
-                        }
-                    }
                     steps {
-                        sh 'nmap -v scanme.nmap.org'
+                        sh 'docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v'
                     }
                 }
 
