@@ -29,7 +29,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {  
                     script {
-
+                        echo env.IMAGES
                         echo "Getting git repo info"
                         // Get the current repository URL
                         REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
@@ -108,7 +108,7 @@ pipeline {
                         }
 
                         // Save images to an environment variable for later stages
-                        IMAGES = images.join(",")
+                        env.IMAGES = images.join(",")
                     }
                 }
             }
@@ -118,8 +118,8 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         def images = []
-                        if (IMAGES && IMAGES.trim()) {
-                            images = IMAGES.split(",")
+                        if (env.IMAGES && env.IMAGES.trim()) {
+                            images = env.IMAGES.split(",")
                         }
                         else {
                             error "No images to scan with Snyk"
