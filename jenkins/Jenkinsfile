@@ -35,7 +35,9 @@ pipeline {
 
                 stage('Run Nmap') {
                     steps {
-                        sh 'docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v'
+                        sh """
+                        docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp nikolaskir2000/nmap_image:latest -v
+                        """
                     }
                 }
 
