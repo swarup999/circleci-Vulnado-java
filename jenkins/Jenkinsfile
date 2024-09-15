@@ -135,20 +135,22 @@ pipeline {
         stage('Clean up') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    def images = env.IMAGES.split(",")
-                    sh """
+                    script {
+                        def images = env.IMAGES.split(",")
+                        sh """
                         REPORT_DIR="reports/${JOB_NAME}_${BUILD_NUMBER}"
                         mkdir -p ${REPORT_DIR}
-
                         mv trufflehog ${REPORT_DIR}/ || true
                         mv sqlmap ${REPORT_DIR}/ || true
-                    """
-                    for (image in images) {
-                        def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
-                        sh """
-                        mv snyk_${sanitizedImageName} ${REPORT_DIR}/ || true
                         """
+                        for (image in images) {
+                            def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
+                            sh """
+                            mv snyk_${sanitizedImageName} ${REPORT_DIR}/ || true
+                            """
+                        }
                     }
+                    
                      
                 }
             }
