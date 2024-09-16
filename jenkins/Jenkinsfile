@@ -38,7 +38,7 @@ pipeline {
             }
         }
 
-        stage('TruffleHog Secret Scan ') {
+        stage('TruffleHog Secret Scan') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
