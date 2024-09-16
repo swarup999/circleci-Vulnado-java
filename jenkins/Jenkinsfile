@@ -161,10 +161,6 @@ pipeline {
 
 
 
-
-
-        stage("Deliver") {
-        }
         stage('SQL map endpoints scan') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
