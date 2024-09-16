@@ -1,20 +1,143 @@
 pipeline {
     agent any
-
+    parameters{
+        string(name: 'dockerComposePath', defaultValue: '', description: 'Path of the docker-compose.yml')
+        string(name: 'dockerfilePath', defaultValue: '', description: 'Path of the Dockerfile')
+        string(name: 'endpointsPath', defaultValue: '', description: 'Path of the endpoints to test SQLmap')
+    }
+    environment {
+        REPO_URL = ''
+        CURR_BRANCH = ''
+        workspace = ''
+        relativeWorkspacePath = ''
+        SNYK_TOKEN = credentials('snyk-token')
+        images_string = ''
+    }
     stages {
-        stage('Checkout') {
+        stage ('Checkout SCM')
+        {
             steps {
-                git 'https://github.com/a-efstathiou/DevSecOps-pipeline-vulnado.git'
-            }
-        }
-         stage('Checkout2') {
-                    steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
                         checkout scm
+                        workspace = pwd ()
                     }
                 }
-       stage('Build') {
+            }
+        }
+        stage('Setting Environment Variables') {
             steps {
-                echo "Building....."
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        echo "Getting git repo info"
+                        // Get the current repository URL
+                        REPO_URL = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
+                        CURR_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+
+        stage('TruffleHog Secret Scan') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        echo "Running Trufflehog Scan"
+                        sh 'rm -f trufflehog'
+
+                        sh """
+                        docker run --rm trufflesecurity/trufflehog:latest git ${REPO_URL} --since-commit HEAD --only-verified > trufflehog
+                        """
+
+                        def truffle = readFile "trufflehog"
+
+                        if (truffle.length() == 0) {
+                            echo "Good to go. No secrets found"
+                        }
+                        else {
+                            echo "Warning! Secrets are committed into your git repository."
+                            error("Secrets might be committed into your git repo")
+                        }
+                    }
+                }
+            }
+        }
+        stage(' Sonar Cube Scan') {
+             steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withSonarQubeEnv(installationName: 'sonarQube1') {
+                        sh './mvnw clean compile'   // Compile the code first
+                        sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes' // Run the SonarQube scan
+                    }
+                }
+
+            }
+        }
+        stage('Check and build Docker Images') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        def images = []
+
+                        if (dockerComposePath?.trim()) {
+                            // If dockerComposePath is provided, run docker-compose to build images
+                            echo "Docker Compose file detected. Building images using docker-compose..."
+                            sh """
+                                docker compose -f ${workspace}${params.dockerComposePath} build --parallel
+                            """
+
+                            // Get repository and tag of the images created by docker-compose
+                            images = sh(script: """
+                                docker compose -f ${workspace}${params.dockerComposePath} images --format '{{.Repository}}:{{.Tag}}'
+                            """, returnStdout: true).trim().split("\n")
+
+                        } else if (dockerfilePath?.trim()) {
+                            // If dockerComposePath is NOT provided, build the Docker image using the Dockerfile
+                            echo "Dockerfile detected. Building image using docker build..."
+
+                            def imageName = "my_image:latest" // You can customize the image name as needed
+                            sh """
+                                docker build -t ${imageName} -f ${params.dockerfilePath} .
+                            """
+
+                            echo "Image built from Dockerfile: ${imageName}"
+                            images << imageName
+                        } else {
+                            error "No Dockerfile or Docker Compose file provided. Please provide at least one."
+                        }
+
+                        // Save images to an environment variable for later stages
+                        images_string = images.join(",")
+                    }
+                }
+            }
+        }
+        stage('Snyk Docker Image vulnerability scan') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        def images = []
+                        if (${images_string} && ${images_string}.trim()) {
+                            images = ${images_string}.split(",")
+                        }
+                        else {
+                            error "No images to scan with Snyk"
+                        }
+
+                        for (image in images) {
+                            def sanitizedImageName = image.replaceAll("/", "_").replaceAll(":", "_")
+
+                            echo "Scanning image: ${image} using Snyk..."
+
+                            sh "rm -f snyk_${sanitizedImageName}"
+
+                            sh """
+                                docker run --rm -it --env ${SNYK_TOKEN} -v /var/run/docker.sock:/var/run/docker.sock \
+                                snyk/snyk:docker snyk test --docker ${image} --severity-threshold=critical --fail-on=all > snyk_${sanitizedImageName}
+                            """
+                        }
+                    }
+                }
             }
         }
 
@@ -50,6 +173,18 @@ pipeline {
 
 
         stage("Deliver") {
+        }
+        stage('SQL map endpoints scan') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh """
+                    docker run --rm -v ${PWD}:/usr/src/myapp -w /usr/src/myapp thanosefsta/sqlmap:latest -m ${workspace}${params.endpointsPath} --batch > sqlmap
+                    """
+                }
+
+            }
+        }
+        stage('Run Nmap - Opened Gates') {
             steps {
                 echo "Deliver"
             }
@@ -59,7 +194,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            // Perform cleanup or archive reports
+
         }
         success {
             echo 'Pipeline completed successfully.'
