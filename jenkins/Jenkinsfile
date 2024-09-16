@@ -141,15 +141,6 @@ pipeline {
             }
         }
 
-        stage(' Sonar Cube Scan') {
-             steps {
-                            withSonarQubeEnv(installationName: 'sonarQube1') {
-                                sh './mvnw clean compile'   // Compile the code first
-                                sh './mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.java.binaries=target/classes' // Run the SonarQube scan
-                            }
-                        }
-        }
-
         stage('Version Docker') {
                     steps {
                          sh 'docker --version'
