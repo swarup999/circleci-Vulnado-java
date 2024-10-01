@@ -17,6 +17,100 @@ public class Comment {
     this.body = body;
     this.created_on = created_on;
   }
+  //Linter unusedVariable inside ! Identified by SonarQube
+  public void unusedVariableMethod() {
+    int unused = 10;
+    System.out.println("One useless comment!");
+  }
+  //Linter - Incorrect method name ! Identified by SonarQube
+  public void FalseNameMethod() {
+    System.out.println("There are many comments in the DB");
+  }
+
+
+  ////Linter - False name - classes ! Identified by SonarQube
+    class CommentImages
+    {
+      class comment_InnerClass{
+        //empty class also...
+      }
+    }
+
+
+
+
+  //SQL INJECTION HERE ! Identified by SonarQube
+  public List<Comment> findUserComments(String username) {
+    Statement statement = null;
+    ResultSet rs = null;
+    List<Comment> comments = new ArrayList<>();
+    Connection con = null;
+
+    try {
+      con = Postgres.connection();
+      statement = con.createStatement();
+
+      // SQL INJECTION
+      String query = "SELECT * FROM comments WHERE username = '" + username + "';";
+      rs = statement.executeQuery(query);
+
+      while (rs.next()) {
+        String id = rs.getString("id");
+        String body = rs.getString("body");
+        Timestamp created_on = rs.getTimestamp("created_on");
+        Comment c = new Comment(id, username, body, created_on);
+        comments.add(c);
+      }
+    } catch (SQLException e) { //Not enough catch-Exception. Does not catch all the cases.
+      e.printStackTrace();
+    }
+    return comments;
+  }
+  public void process(int value) {
+    if (value > 0) {
+      if (value < 10) {
+        System.out.println("Small value");
+      } else {
+        System.out.println("Medium value");
+      }
+    } else {
+      if (value == 0) {
+        System.out.println("Zero");
+      } else {
+        System.out.println("Negative value");
+      }
+    }
+  }
+
+
+
+  //Try - Catch Should be here ! Identified by SonarQube
+  private Boolean commit() throws SQLException {
+    String sql = "INSERT INTO comments (id, username, body, created_on) VALUES (?,?,?,?)";
+    Connection con = Postgres.connection();
+    PreparedStatement pStatement = con.prepareStatement(sql);
+    pStatement.setString(1, this.id);
+    pStatement.setString(2, this.username);
+    pStatement.setString(3, this.body);
+    pStatement.setTimestamp(4, this.created_on);
+    return 1 == pStatement.executeUpdate();
+  }
+
+
+  //finally must not have return ! Identified by SonarQube
+  public static Boolean delete(String id) {
+    try {
+      String sql = "DELETE FROM comments where id = ?";
+      Connection con = Postgres.connection();
+      PreparedStatement pStatement = con.prepareStatement(sql);
+      pStatement.setString(1, id);
+      return 1 == pStatement.executeUpdate();
+    } catch(Exception e) {
+      e.printStackTrace();
+    } finally {
+      return false;
+    }
+  }
 
   public static Comment create(String username, String body){
     long time = new Date().getTime();
@@ -59,28 +153,5 @@ public class Comment {
     }
   }
 
-  public static Boolean delete(String id) {
-    try {
-      String sql = "DELETE FROM comments where id = ?";
-      Connection con = Postgres.connection();
-      PreparedStatement pStatement = con.prepareStatement(sql);
-      pStatement.setString(1, id);
-      return 1 == pStatement.executeUpdate();
-    } catch(Exception e) {
-      e.printStackTrace();
-    } finally {
-      return false;
-    }
-  }
 
-  private Boolean commit() throws SQLException {
-    String sql = "INSERT INTO comments (id, username, body, created_on) VALUES (?,?,?,?)";
-    Connection con = Postgres.connection();
-    PreparedStatement pStatement = con.prepareStatement(sql);
-    pStatement.setString(1, this.id);
-    pStatement.setString(2, this.username);
-    pStatement.setString(3, this.body);
-    pStatement.setTimestamp(4, this.created_on);
-    return 1 == pStatement.executeUpdate();
-  }
 }
