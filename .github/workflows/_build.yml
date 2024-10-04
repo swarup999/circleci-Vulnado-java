@@ -35,5 +35,5 @@ jobs:
           mvn -B clean package --file pom.xml
           
           
-            if-no-files-found: error
+
    
