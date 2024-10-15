@@ -34,6 +34,8 @@ jobs:
           pwd
           mvn -B clean package --file pom.xml
           
-          
-
-   
+      - uses: actions/upload-artifact@v4
+        with:
+          name: veracode-artifact
+          path: /home/runner/work/vulnado/vulnado/target/vulnado-0.0.1-SNAPSHOT.jar
+          if-no-files-found: error
