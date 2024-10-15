@@ -1,3 +1,0 @@
-veracode_static_scan:
-policy: 'Veracode Recommended Very High'
-use_custom_workflow: _build
